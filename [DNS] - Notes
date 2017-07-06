@@ -1,0 +1,11 @@
+### Notes
+- DNS Architecture:
+	- Master-Slave
+	- Multi-masters
+	- Stealth
+- Anycast DNS
+- DNSSEC
+- Authoritative Name Server using BIND9/NSD
+- Ref:
+	- DNS and BIND: chapter 11 - Security
+	- Building Internet Firewall: chapter 4- Firewall Architecture
