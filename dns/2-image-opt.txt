@@ -1,0 +1,16 @@
+Image Optimization
+- Cach thuc:
+  - Granular cache controls: thiết kế Dashboard cho phép người dùng tự định nghĩa caching policies, thiết lập fules cho từng file, từng groups và loại file cụ thể. Proxy caching cắt giảm bandwidth chiếm dụng đồng thời giảm gánh nặng cho máy chủ gốc
+
+  - Automated compression – tự động hóa việc nén các images và cho phép thiết lập cân bằng giữa tốc độ tải trang và chất lượng ảnh
+  - Progressive rendering – render image từ độ phân giải thấp, từ từ nâng lên độ phana giải cao, ưu tiên load trang trước
+
+- image operations: 
+  - purchase image proxy services: Cloudinary, Cloudflare Mirage
+  - build proxy images: use third-party module and rebuild nginx - https://github.com/niiknow/docker-nginx-image-proxy
+
+- Target:
+  - Phát hiện được thiết bị và tình trạng kết nối mạng và lưu trữ dữ liệu trong lần truy cập tiếp theo --> thích nghi với kích thước màn hình và kết nối mạng
+  - Giữ hai version của images cache, nếu kết nối mạng yếu, phục vụ bằng version có độ phana giải thấp hơn.
+  https://github.com/cubicdaiya/ngx_small_light
+

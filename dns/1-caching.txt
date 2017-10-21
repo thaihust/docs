@@ -1,0 +1,88 @@
+- https://www.nginx.com/products/nginx/caching/
+- https://www.nginx.com/blog/nginx-caching-guide/
+- https://www.nginx.com/blog/nginx-high-performance-caching/
+
+- There are potentially multiple caches between the web browser and the application server: 
+  - the client’s browser cache
+  - intermediary caches
+  - content delivery networks (CDNs)
+  - the load balancer or reverse proxy sitting in front of the application servers. 
+Caching, even at the reverse proxy/load balancer level, can greatly improve performance.
+
+- Time to First bytes?!
+
+- NGINX is commonly deployed as a reverse proxy or load balancer in an application stack and has a full set of caching features. The next section discusses how to configure basic caching with NGINX.
+
+
+------Configuration------
+- Basic caching:
+  - proxy_cache_path: directive sets the path and configuration of the cache
+  - proxy_cache: directive activates proxy_cache_path
+
+- Proxy_cache_path settings:
+  - /path/to/cache: thư mục lưu cache
+  - levels: thiết lập phả hệ thư mục hai mức dưới thư mục /path/to/cache. Quá nhiều file đặt cùng thư mục sẽ khiến cho việc truy cập file bị chậm đi
+  --> recommend: two-level directory hierarchy. Ko sử dụng tham số levels --> toàn bộ các file cache đặt trong cùng 1 thư mục
+  - keys_zone: thiết lập một zone vùng nhớ chia sẻ để lưu trữ cache keys và metadata (eg: usage timers). Giữ bản copy của các key trong bộ nhớ cho phép NGINX nhanh chóng xác định một request là HIT hay MISS mà không phải truy cập vào ổ cứng
+  --> tăng tốc độ truy cập.
+   1 MB zone lưu trữ được dữ liệu cho 8000 keys, 10 MB zone được cấu hình --> lưu trữ data cho 80000 keys.
+  - max_size: thiết lập dung lượng cache tối đa --> không thiết lập --> cache tăng lên cho tới khi đầy ổ cứng. Khi Kích thước cache đạt tới giới hạn 
+  --> tiến trình cache manager sẽ xóa bỏ các tệp ít được try cập để giảm dung lượng cache xuống dưới giới hạn tối đa
+  - inactive: thời gian tối đa để một item còn được giữ lại trong cache kể từ lần cuối truy cập.
+  --> giá trị mặc định: 10 phút --> quá thời gian này, item sẽ bị hủy. 
+  inactive content khác với expired content: expired content sẽ không tự động bị xóa do thiết lập của cache control header
+  (e.g: Cache-Control:max-age=120). Expired content bị xóa chỉ khi nào khoảng thời gian kể từ lần cuối được truy cập đạt tới ngưỡng
+  inactive. Khi chưa tới giới hạn inactive này, nếu expired content được truy cập, NGINX refresh nội dung content từ origin server và thiết lập lại
+  inactive timer.
+  - use_temp_path=off: ngăn không cho NGINX ghi các file vào vùng lưu trữ tạm thời, tránh copy dữ liệu trong hệ thống files.
+
+- Proxy_cache: activates caching tất cả các content khớp với URL của parent `location` block (ví dụ /).
+Muốn áp dụng cho mọi block `location` --> thiết lập proxy_cache trong block `server`.
+
+--- Phục vụ bằng cache khi server bị down hoặc bận bằng nội dung cũ của cache---
+--> Cấu hình stale content
+- Trong block location:
+proxy_cache_use_stale error timeout http_500 http_502 http_503 http_504;
+
+--- Fine‑Tuning the Cache ---
+- Cau hinh trong block location:
+proxy_cache_revalidate on; --> cho phep refesh lai cache da expired khi chua inactive
+proxy_cache_min_uses 3; --> so luong request toi thieu truoc khi cache, dam bao noi dung duoc yeu cau la regular
+proxy_cache_use_stale error timeout updating http_500 http_502
+                      http_503 http_504;
+proxy_cache_lock on; --> nếu nhiều request cùng một lúc yêu cầu nội dung bị MISS thì chỉ request đầu tiên được gửi tới server gốc, các request sau sẽ được phục vụ khi content fetch từ origin về cache server.
+
+
+proxy_cache_revalidate on;
+proxy_cache_min_uses 3;
+proxy_cache_lock on;
+
+--- Phan tan cache tren nhieu o cung ----
+
+proxy_cache_path /path/to/hdd1 levels=1:2 keys_zone=my_cache_hdd1:10m
+                 max_size=10g inactive=60m use_temp_path=off;
+proxy_cache_path /path/to/hdd2 levels=1:2 keys_zone=my_cache_hdd2:10m
+                 max_size=10g inactive=60m use_temp_path=off;
+
+
+split_clients $request_uri $my_cache {
+              50%          “my_cache_hdd1”;
+              50%          “my_cache_hdd2”;
+}
+
+server {
+    # ...
+    location / {
+        proxy_cache $my_cache;
+        proxy_pass http://my_upstream;
+    }
+}
+
+
+-- Further configuration --
+- Cache control header vs Expires: Cache control header - quyet dinh co gui len server hay phuc vu tu cache -> 
+  cache-control options: https://trinhtuantai.com/cache-trinh-duyet-browser-cache-cho-website-cua-ban.html
+- Last-Modified vs Etag header: Last-Modified quyet dinh khi gui len server 
+- Pragma header:
+- Purging cache: xoa cache truc tiep 
+ (One of the side effects of content caching is that content updates on the origin server do not necessarily propagate immediately to the cache, meaning that clients might continue to be served the old content for a period of time. If an update operation changes a number of resources at the same time (for example, changes a CSS file and referenced images), it’s possible for a client to be served a mixture of stale and current resources, making for an inconsistent presentation.)

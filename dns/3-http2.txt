@@ -1,0 +1,20 @@
+http2:
+- Cho phép trình duyệt có thể sắp xếp thứ tự ưu tiên tải về cho các tài nguyên nào quan trọng dùng để hiển thị trang.
+- Cho phép nén và giảm thiểu các HTTP header.
+- Bổ sung tính năng server push: Máy chủ sẽ gửi về các tài nguyên quan trọng cho trình duyệt trước khi trình duyệt phải gửi yêu cầu tới máy chủ cho các tài nguyên này.
+https://www.nginx.com/blog/nginx-ssl/
+https://devopedia.org/http-2
+https://www.ibm.com/developerworks/library/wa-http2-under-the-hood/index.html
+https://blog.cloudflare.com/tools-for-debugging-testing-and-using-http-2/
+https://www.nginx.com/blog/http2-r7/
+https://blogs.akamai.com/2017/03/http2-server-push-the-what-how-and-why.html
+
+https://http2.github.io/http2-spec/
+
+https://www.slideshare.net/darshanz1/introduction-to-http2-76677796
+https://www.slideshare.net/nakov/http2-for-developers
+
+http/1.x improvement methods
+https://hpbn.co/http1x/
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Connection_management_in_HTTP_1.x
+
