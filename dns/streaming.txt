@@ -1,0 +1,48 @@
+https://codex.wordpress.org/Nginx
+https://github.com/pothi/WordPress-Nginx/
+https://github.com/autopilotpattern/nginx/issues/2
+
+
+https://www.dacast.com/blog/bandwidth-requirements-streaming-live-video/
+
+- Yêu cầu cơ bản về tính năng (tham khảo: http://plumitv.com/wp-content/uploads/2016/12/Plum-Edge-server.pdf và tài liệu nginx): 
+    - Hỗ trợ các định dạng file video và audio phổ biến: FLV, MP4, MP3
+	- Hỗ trợ HTTP based streaming protocol(cả input protocol từ server gốc và output protocol tới client): HTTP Live Streaming, HTTP Dynamic Streaming, MPEG-DASH.
+	- Hỗ trợ các codecs cho video và audio: H.264, AAC,...
+	- Bandwidth & storage control
+	- Nâng cao: hỗ trợ adaptive streaming, cụ thể là multi bitrate.
+- Usecases:
+	- Live Streaming
+	- Video on Demand
+- Tính toán storage và bandwidth:
+	- Bandwidth & Total traffic/month:
+        - Băng thông yêu cầu phụ thuộc và chất lượng stream. Ví dụ dịch vụ live stream mà Netflix cung cấp cho người dùng:
+			- 500 Kbps – yêu cầu tối thiểu cho streaming
+			- 1.5 Mbps – yêu cầu khuyên dùng cho chất lượng xem ổn định
+			- 3 Mbps – Standard Definition video
+			- 5-8 Mbps – 720p & 1080p High Definition
+			- 25 Mbps – 4K Ultra High Definition
+		- Stream factors: 
+			- Resolution(width x height)
+			- Stream quality 
+				- Frame per Second - FPS (ví dụ: 30 fps cho live stream thông thường, 60 fps cho game live stream)
+				- Bits per Pixel (Color bit depth) - BPP (ví dụ với codec x264 (H.264 hoặc AAC) là 0.1)
+			- Bitrates 
+				- Video bitrate(Kbps) = (width x height x FPS x BPP)/1000
+				- Audio bitrate (e.g: 96|128| kbps)
+				- TOTAL bitrate (Stream bitrate) = video bitrate + audio bitrate
+			--> Từ đó tính toán Internet upload bandwidth = Stream bitrate x (1|1.25|...). Hệ số tùy chỉnh để tính Internet upload bandwidth tối thiểu là 1.
+	        - Tổng Streaming bandwidth:
+				- Video on Demand: 
+					- Bandwidth (Kbps) = Stream bitrate (Kbps) x số người xem đồng thời
+				- Live streaming: 
+					- Băng thông yêu cầu tính như Video on Demands
+					- Tổng traffic cho live streaming (MB) = Stream bitrate (bps) x số lượng người xem x thời gian live stream x / (8 x 2^20)
+	- Storage: 
+		- Tính toán cho use case Video on Demand: Dung lượng lưu trữ một video (MB) = Độ dài video (s) x Stream bitrate (bps) / (8 x 2^20) 
+	- Tham khảo số liệu tính toán tại: http://support.ensemblevideo.com/streaming-and-storage-usage-estimates/
+	- Tham khảo cách tính toán tại:
+		- https://www.reddit.com/r/Twitch/comments/2dz7ru/bitrates_resolutions_and_quality/
+		- https://docs.google.com/spreadsheets/d/1Vm0_8BQGNxKcowK5RwTgiqQisR4mVblbWvl-N4A-lDM/edit#gid=0
+		- https://streaming.hk/BQ.html
+		
